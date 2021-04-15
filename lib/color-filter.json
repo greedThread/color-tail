@@ -1,0 +1,16 @@
+{
+  "COLOR_SAMPLE_TAG"   : ["SUCCESS","WARN", "ERROR", "INFO"],
+  "COLOR_SAMPLE_COLOR" : ["blue","yellow", "red", "green"],
+
+  "RES::":  "INFO",
+  "REQ::":  "INFO",
+  "INFO" :  "INFO",
+  "ERROR":  "ERROR",
+  "ERR"  :  "ERROR",
+  "SUCCESS": "blue",
+
+  "SELECT": "blue",
+  "UPDATE": "blue",
+  "DELETE": "blue",
+  "REPLACE":"blue"
+}
