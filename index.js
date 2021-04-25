@@ -103,19 +103,6 @@ function getTextKeyInList(arr, targetStr) {
     return "reset";
 }
 
-function getListTextKeyInList(arr, targetStr) {
-    let list = [];
-    for(let i in arr) {
-        let key = arr[i];
-        if(targetStr.includes(key)) {
-            list.push(key);
-        }
-    }
-    return list;
-}
-
-
-
 function filterdColor(message) { 
     try {
         if(typeof message === "string") {
@@ -123,14 +110,11 @@ function filterdColor(message) {
             message = filterLineColor(message);
             message = filterWordColor(message);
             // 단어에 대한 필터를 처리한다.
-
         }
     }
     catch(err) {
 
     }
-
-    // if(color === "" || color === undefined) color = (COLORS["reset"]);
 
     return message;
 }
