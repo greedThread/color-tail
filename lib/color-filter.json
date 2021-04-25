@@ -1,16 +1,24 @@
 {
-  "COLOR_SAMPLE_TAG"   : ["SUCCESS","WARN", "ERROR", "INFO"],
-  "COLOR_SAMPLE_COLOR" : ["blue","yellow", "red", "green"],
+  "LINE" : {
+    "INFO"    : "green",
+    "SUCCESS" : "blue",
+    "WARN"    : "yellow",
+    "ERROR"   : "red",
+    "FAIL"    : "red",
 
-  "RES::":  "INFO",
-  "REQ::":  "INFO",
-  "INFO" :  "INFO",
-  "ERROR":  "ERROR",
-  "ERR"  :  "ERROR",
-  "SUCCESS": "blue",
+    "SELECT": "cyan",
+    "UPDATE": "cyan",
+    "DELETE": "cyan",
+    "REPLACE":"cyan",
 
-  "SELECT": "blue",
-  "UPDATE": "blue",
-  "DELETE": "blue",
-  "REPLACE":"blue"
+    "RES::":  "green",
+    "REQ::":  "green",
+
+    "REQUEST": "green",
+    "RESPONSE": "green"
+  },
+  "WORD" : {
+      "user_idx" : "bgBlackBright",
+      "abc"  : "bgWhite"
+  }
 }

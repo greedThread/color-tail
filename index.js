@@ -1,62 +1,33 @@
 #!/usr/bin/env node
 // const TailFile = require('@logdna/tail-file');
 
-const Tail = require('tail').Tail;
-
+var ts = require('tail-stream');
 const path = require("path");
 const fs = require('fs');
 const chalk = require('chalk');
+const EOL = require("os").EOL;
 
+let LINE_FILTER, LINE_FILTER_KEY;
+let WORD_FILTER, WORD_FILTER_KEY;
 
-let FILTER, FILTER_KEY;
+function filterLineColor(message) {
+    let key = LINE_FILTER[getTextKeyInList(LINE_FILTER_KEY, message)];
 
-const COLORS = {
-    reset: "\x1b[0m",
-    bright: "\x1b[1m",
-    dim: "\x1b[2m",
-    underscore: "\x1b[4m",
-    blink: "\x1b[5m",
-    reverse: "\x1b[7m",
-    hidden: "\x1b[8m",
+    let color = chalk[key];
+    if(color === undefined) color = chalk.reset;
 
-    black: "\x1b[30m",
-    red: "\x1b[31m",
-    green: "\x1b[32m",
-    yellow: "\x1b[33m",
-    blue: "\x1b[34m",
-    magenta: "\x1b[35m",
-    cyan: "\x1b[36m",
-    white: "\x1b[37m",
-    crimson: "\x1b[38m", // Scarlet
+    return color(message);
+}
 
-    fg: {
-        black: "\x1b[30m",
-        red: "\x1b[31m",
-        green: "\x1b[32m",
-        yellow: "\x1b[33m",
-        blue: "\x1b[34m",
-        magenta: "\x1b[35m",
-        cyan: "\x1b[36m",
-        white: "\x1b[37m",
-        crimson: "\x1b[38m" // Scarlet
-    },
-    bg: {
-        black: "\x1b[40m",
-        red: "\x1b[41m",
-        green: "\x1b[42m",
-        yellow: "\x1b[43m",
-        blue: "\x1b[44m",
-        magenta: "\x1b[45m",
-        cyan: "\x1b[46m",
-        white: "\x1b[47m",
-        crimson: "\x1b[48m"
-    },
+function filterWordColor(message) {
+    for(let i = 0; i < WORD_FILTER_KEY.length; i++) {
+        let pattern = new RegExp("("+ WORD_FILTER_KEY[i] +")");
+        let colorChalk = chalk[WORD_FILTER[WORD_FILTER_KEY[i]]];
+        message = message.replace(pattern, colorChalk("$1"));
+    }
 
-    SUCCESS : "\x1b[34m",
-    WARN    : "\x1b[33m",
-    ERROR   : "\x1b[31m",
-    INFO    : "\x1b[32m",
-};
+    return message;
+}
 
 function displayUsage() {
     console.log('usage: color-tail [options] <command>')
@@ -132,33 +103,57 @@ function getTextKeyInList(arr, targetStr) {
     return "reset";
 }
 
-function filterdColor(message) {
-    message += "---------"
+function getListTextKeyInList(arr, targetStr) {
+    let list = [];
+    for(let i in arr) {
+        let key = arr[i];
+        if(targetStr.includes(key)) {
+            list.push(key);
+        }
+    }
+    return list;
+}
 
-    let color = "";
+
+
+function filterdColor(message) { 
     try {
         if(typeof message === "string") {
-            if(FILTER[getTextKeyInList(FILTER_KEY, message)] === undefined) return COLORS["reset"] + message;
-            color = COLORS[FILTER[getTextKeyInList(FILTER_KEY, message)]];
-            color = color === undefined ? COLORS["reset"] : color;
+            // 라인에 대한 필터를 처리한다.
+            message = filterLineColor(message);
+            message = filterWordColor(message);
+            // 단어에 대한 필터를 처리한다.
+
         }
     }
     catch(err) {
 
     }
 
-    if(color === "") color = (COLORS["reset"]);
+    // if(color === "" || color === undefined) color = (COLORS["reset"]);
 
-    return (color) + message;
+    return message;
 }
 
 function printMultiLine(multiChunk) {
-    multiChunk = multiChunk.replace(/\n/gi, "")
-    let textLine = multiChunk.split("\r");
-
+    let textLine = multiChunk.split(EOL);
     for(let idx in textLine) {
-        console.log((textLine[idx]));
+        console.log(filterdColor(textLine[idx]));
     }
+}
+
+function initColorFilter() {
+    let jsonFilePath = args[2] === undefined ? "./lib/color-filter.json" : args[2];
+    let jsonFile = fs.readFileSync(jsonFilePath, 'utf-8');
+
+    let FILTER = JSON.parse(jsonFile);
+
+    LINE_FILTER      =  FILTER["LINE"];
+    LINE_FILTER_KEY  =  Object.keys(LINE_FILTER);
+ 
+    WORD_FILTER        = FILTER["WORD"];
+    WORD_FILTER_KEY    = Object.keys(FILTER["WORD"]);
+
 }
 
 function tail(command) {
@@ -167,44 +162,43 @@ function tail(command) {
         console.log("ERROR: File not found");
         return;
     }
+    initColorFilter();
 
-    let jsonFilePath = args[2] === undefined ? "./lib/color-filter.json" : args[2];
-    let jsonFile = fs.readFileSync(jsonFilePath, 'utf-8');
-
-    FILTER      =  JSON.parse(jsonFile);
-    FILTER_KEY  = Object.keys(FILTER);
-
-    const tailOpt = {
-        encoding : 'utf-8'
+    const tailOpt ={
+        beginAt: 0,
+        onMove: 'follow',
+        detectTruncate: false,
+        endOnError: false
     }
 
-    let isInit = false;
-    if(command === "start") {
-        tailOpt["startPos"] = 0;
-    }
-    else {
-        isInit = true;
-    }
+    if(command === "start") tailOpt["beginAt"] = 0;
+    else if(command === "end") tailOpt["beginAt"] = "end";
 
-    const tail = new Tail(fileName, tailOpt);
-
-    console.log("aaaaaaaaaaaaaaaaaaaaa");
-    tail.on('line', (chunk) => {
-        if(!iscInit) {
-            isInit = true;
-            printMultiLine(chunk);
-        }
-        else {
-            console.log(filterdColor(chunk))
-        }
-    })
-
-
-    tail.on('error', (err) => {
-        console.error('A TailFile stream error was likely encountered', err)
+    var tstream = ts.createReadStream(fileName, tailOpt);
+    // var fs = require("fs");
+    tstream.on('data', function(data) {
+        printMultiLine(data.toString());
     });
 
-    tail.watch();
+    tstream.on('eof', function() {
+        // console.log("reached end of file");
+    });
+
+    tstream.on('move', function(oldpath, newpath) {
+        // console.log("file moved from: " + oldpath + " to " + newpath);
+    });
+
+    tstream.on('truncate', function(newsize, oldsize) {
+        // console.log("file truncated from: " + oldsize + " to " + newsize);
+    });
+
+    tstream.on('end', function() {
+        // console.log("ended");
+    });
+
+    tstream.on('error', function(err) {
+        console.log("error: " + err);
+    });
 }
 
 
