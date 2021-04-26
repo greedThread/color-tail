@@ -1,23 +1,28 @@
 1. global install
-npm uninstall -g ./color-tail  
-npm install -g ./color-tail
+
+- install 
+  - npm install 
+  - npm install -g ./color-tail
+- uninstall : npm uninstall -g ./color-tail
 
 2. usage  
-- color-tail start <file path> <color-filter json>
-- color-tail end <file path> <color-filter json>
+- color-tail start [file path] [color-filter json]
+- color-tail end [file path]  [color-filter json]
 - ex> color-tail start home/21-01-01.log my-filter.json 
 
 3. color-filter.json  
 color-ref : https://www.npmjs.com/package/chalk
    
+
+
 ```
 {
 "LINE" : {
-"INFO"    : "green",
-"SUCCESS" : "blue",
-"WARN"    : "yellow",
-"ERROR"   : "red",
-"FAIL"    : "red",
+    "INFO"    : "green",
+    "SUCCESS" : "blue",
+    "WARN"    : "yellow",
+    "ERROR"   : "red",
+    "FAIL"    : "red",
     "SELECT": "cyan",
     "UPDATE": "cyan",
     "DELETE": "cyan",
