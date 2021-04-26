@@ -1,1 +1,2 @@
--- git color tail 
+npm uninstall -g ./color-tail
+npm install -g ./color-tail

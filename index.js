@@ -122,7 +122,7 @@ function filterdColor(message) {
 function printMultiLine(multiChunk) {
     let textLine = multiChunk.split(EOL);
     for(let idx in textLine) {
-        console.log(filterdColor(textLine[idx]));
+        if(textLine[idx] !== "") console.log(filterdColor(textLine[idx]));
     }
 }
 
