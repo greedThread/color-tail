@@ -2,8 +2,9 @@
 
 - install 
   - npm install 
-  - npm install -g ./color-tail
-- uninstall : npm uninstall -g ./color-tail
+  - npm install -g ./color-tail (<= this project)
+- uninstall 
+  - npm uninstall -g ./color-tail
 
 2. usage  
 - color-tail start [file path] [color-filter json]
